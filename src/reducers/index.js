@@ -6,5 +6,5 @@ import loadMoreReducer from './loadMoreReducer';
 export default combineReducers ({
   moviesList: MovieReducer,
   selectedMovieId: selectMovieReducer,
-  pageCount: loadMoreReducer
+  loadCount: loadMoreReducer
 })

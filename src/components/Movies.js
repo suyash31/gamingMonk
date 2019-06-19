@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
-import { View, Text, FlatList } from 'react-native';
+import { View, FlatList, ActivityIndicator } from 'react-native';
 import ListItem from './ListItem';
 import * as actions from '../actions';
 import * as API from '../utilities/api';
@@ -8,17 +8,16 @@ import * as API from '../utilities/api';
 class Movies extends Component {
   constructor(props) {
     super(props)
+    this.state = {
+      loading: true,
+    }
   }
 
   componentDidMount = () => {
-    console.log('this ', this.props.pageCount);
     API.getPopularMovies()
     .then(res => {
-      if (res.results.length > 10) {
         this.props.addMovies(res.results.slice(0,10));
-      } else {
-        this.props.addMovies(res.results);
-      }
+        this.setState({ loading: false });
     })
   }
 
@@ -29,6 +28,13 @@ class Movies extends Component {
     return <ListItem movie = {item} lastMovieId = {lastMovieId}/>;
   }
   render() {
+    if (this.state.loading) {
+      return (
+        <View style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
+          <ActivityIndicator size="large" color="#ddd" />
+        </View>
+      );
+    }
     return (
       <View>
         <FlatList
@@ -42,7 +48,7 @@ class Movies extends Component {
 }
 
 const mapStateToProps = (state) => {
-  return {moviesList : state.moviesList, pageCount: state.pageCount}
+  return {moviesList : state.moviesList, loadCount: state.loadCount}
 }
 
 export default connect(mapStateToProps, actions)(Movies);

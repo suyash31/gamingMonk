@@ -49,6 +49,7 @@ class ListItem extends Component {
       like: false,
       dislike: false,
       loading: false,
+      noData: false,
     }
   }
 
@@ -77,19 +78,28 @@ class ListItem extends Component {
     let start = 0;
     let end = 0;
     this.setState({ loading: true });
-    const page = this.props.pageCount + 1;
-    if (page % 2 !== 0) {
+    let loadCount = this.props.loadCount + 1;
+    let page = Math.ceil(loadCount / 2);
+    console.log('load count ', loadCount);
+    console.log('page no ', page);
+
+    if (loadCount % 2 !== 0) {
       start = 0;
       end = 10;
     } else {
       start = 10;
       end = 20;
     }
-    this.props.loadMore(page);
+    this.props.loadMore(loadCount);
     API.getPopularMovies(page)
     .then((res) => {
-      this.props.addMovies(res.results.slice(start, end));
-      this.setState({ loading: false });
+      // if (res.results.length !== 0) {
+        this.props.addMovies(res.results.slice(start, end));
+        this.setState({ loading: false });
+      // } else {
+      //   this.setState({ noData: true, loading: false });
+      // }
+      
     });
   }
 
@@ -169,9 +179,15 @@ class ListItem extends Component {
                 <ActivityIndicator size="large" color="#ddd" />
               </View> :
               <CardSection>
-                <Button  onPress={this.loadMore}>
-                  Load More ...
-                </Button>
+                {
+                  this.state.noData ?
+                  <View style={{ flex: 1,justifyContent: 'center', alignItems: 'center'}}>
+                    <Text>That's all for Popular Movies </Text>
+                  </View> :
+                  <Button  onPress={this.loadMore}>
+                    Load More ...
+                  </Button>
+                }
               </CardSection>
             }
           </View>
@@ -184,7 +200,7 @@ class ListItem extends Component {
 
 const mapStateToProps = (state, ownProps) => {
   const expanded = state.selectedMovieId === ownProps.movie.id;
-  return { expanded, pageCount: state.pageCount };
+  return { expanded, loadCount: state.loadCount };
 }
 
 export default connect(mapStateToProps, actions)(ListItem);
